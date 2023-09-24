@@ -9,7 +9,7 @@
   },
   "builders": [{
     // Configuration for building the custom AMI
-    "ami_description": "Encrypted - 2022 - Kali AMI for SNAKE_EATER_SWARM.",  // Description for the AMI
+    "ami_description": "Encrypted - Kali AMI",  // Description for the AMI
     "ami_name": "Encrypted-{{user `ami`}}-{{isotime | clean_resource_name}}", // AMI name with a timestamp
     "instance_type": "t3.2xlarge",  // EC2 instance type
     "region": "{{user `region`}}",  // Region for the AMI
@@ -96,6 +96,12 @@
       "type": "file",
       "source": "{{template_dir}}/desktop/domains/asset_note.domains.txt",
       "destination": "/home/kali/domains/asset_note.txt"
+    },
+    {
+      // Provisioner to add SSH public key to user's authorized_keys
+      "type": "file",
+      "source": "/path/to/your/ssh/public/key.pub",  // Path to your SSH public key
+      "destination": "/home/kali/.ssh/authorized_keys"
     }
   ]
 }
