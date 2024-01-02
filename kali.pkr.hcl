@@ -1,21 +1,18 @@
 {
   "variables": {
-    // Define variables for customization
-    "ami"   : "{{env `AMI`}}",      // AMI ID
-    "region": "{{env `REGION`}}",  // AWS region
-    "script": "{{env `SCRIPT`}}",  // User-provided script
-    "tag":    "{{env `NAME`}}",    // Name tag for resources
-    "root_volume_size_Gi": "120"   // Root volume size in GiB
+    "ami"   : "{{env `AMI`}}",
+    "region": "{{env `REGION`}}",
+    "script": "{{env `SCRIPT`}}",
+    "tag":    "{{env `NAME`}}",
+    "root_volume_size_Gi": "120"
   },
   "builders": [{
-    // Configuration for building the custom AMI
-    "ami_description": "Encrypted - Kali AMI",  // Description for the AMI
-    "ami_name": "Encrypted-{{user `ami`}}-{{isotime | clean_resource_name}}", // AMI name with a timestamp
-    "instance_type": "t3.2xlarge",  // EC2 instance type
-    "region": "{{user `region`}}",  // Region for the AMI
-    "encrypt_boot": "true",        // Encrypt the boot volume
+    "ami_description": "Encrypted - Kali AMI",
+    "ami_name": "Encrypted-{{user `ami`}}-{{isotime | clean_resource_name}}",
+    "instance_type": "t3.2xlarge",
+    "region": "{{user `region`}}",
+    "encrypt_boot": "true",
     "source_ami_filter": {
-      // Filter criteria for source AMI selection
       "filters": {
         "architecture": "x86_64",
         "block-device-mapping.volume-type": "gp2",
@@ -25,28 +22,25 @@
       },
       "most_recent": true,
       "owners": [
-        "211372476111"  // Owner ID of the source AMI
+        "211372476111"
       ]
     },
     "launch_block_device_mappings": [
-      // Configuration for the block device mapping
       {
         "device_name": "/dev/sda1",
-        "volume_size": "{{user `root_volume_size_Gi`}}", // Custom root volume size
+        "volume_size": "{{user `root_volume_size_Gi`}}",
         "volume_type": "gp2",
         "encrypted": true,
         "delete_on_termination": true
       }
     ],
     "run_tags":{
-      // Set tags for the launched instance
       "Name":"{{user `tag`}}"
     },
-    "ssh_username": "kali",  // SSH username for connecting to the instance
-    "type": "amazon-ebs"     // Builder type for Amazon EBS-backed AMI
+    "ssh_username": "kali",
+    "type": "amazon-ebs"
   }],
   "provisioners": [{
-    // Shell provisioner with inline shell commands for instance setup
     "inline": [
       "echo set debconf to Noninteractive",
       "echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections",
@@ -67,40 +61,34 @@
     "type": "shell"
   },
     {
-      // Shell provisioner to run a user-provided script
       "scripts": [
         "{{template_dir}}/{{user `script`}}"
       ],
       "type": "shell"
     },
     {
-      // File provisioner to copy a script to the instance
       "type": "file",
       "source": "{{template_dir}}/desktop/install-tools.sh",
       "destination": "/home/kali/install-tools.sh"
     },
     {
-      // File provisioner to copy a script to the instance
       "type": "file",
       "source": "{{template_dir}}/desktop/motd.sh",
       "destination": "/home/kali/motd.sh"
     },
     {
-      // File provisioner to copy a file to the instance
       "type": "file",
       "source": "{{template_dir}}/desktop/domains/orig.domains.txt",
       "destination": "/home/kali/domains/orig.domains.txt"
     },
     {
-      // File provisioner to copy a file to the instance
       "type": "file",
       "source": "{{template_dir}}/desktop/domains/asset_note.domains.txt",
       "destination": "/home/kali/domains/asset_note.txt"
     },
     {
-      // Provisioner to add SSH public key to user's authorized_keys
       "type": "file",
-      "source": "/path/to/your/ssh/public/key.pub",  // Path to your SSH public key
+      "source": "/path/to/your/ssh/public/key.pub",
       "destination": "/home/kali/.ssh/authorized_keys"
     }
   ]
