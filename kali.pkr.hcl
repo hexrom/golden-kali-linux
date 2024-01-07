@@ -1,3 +1,12 @@
+packer {
+  required_plugins {
+    amazon = {
+      source  = "github.com/hashicorp/amazon"
+      version = "~> 1"
+    }
+  }
+}
+
 variable "region" {
   default = "us-east-1"
 }
@@ -11,22 +20,25 @@ variable "root_volume_size_Gi" {
 }
 
 source "amazon-ebs" "kali-linux" {
-  ami_description            = "Encrypted - Kali AMI"
-  ami_name                   = "Encrypted-Kali-${formatdate("YYYYMMDDhhmmss", timestamp())}"
-  instance_type              = "t2.medium"
-  region                     = var.region
-  encrypt_boot               = true
+  ami_description = "Encrypted - Kali AMI"
+  ami_name        = "Encrypted-Kali-${formatdate("YYYYMMDDhhmmss", timestamp())}"
+  instance_type   = "t2.medium"
+  region          = var.region
+  encrypt_boot    = true
+  ssh_timeout     = "10m"
+
   source_ami_filter {
     filters = {
-      "architecture"                = "x86_64"
-      "block-device-mapping.volume-type" = "gp2"
-      "name"                        = "kali-last*"
-      "root-device-type"            = "ebs"
-      "virtualization-type"         = "hvm"
+      "architecture"                      = "x86_64"
+      "block-device-mapping.volume-type"  = "gp2"
+      "name"                              = "kali-last*"
+      "root-device-type"                  = "ebs"
+      "virtualization-type"               = "hvm"
     }
     most_recent = true
     owners      = ["679593333241"]
   }
+
   launch_block_device_mappings {
     device_name           = "/dev/sda1"
     volume_size           = var.root_volume_size_Gi
@@ -34,9 +46,11 @@ source "amazon-ebs" "kali-linux" {
     encrypted             = true
     delete_on_termination = true
   }
-  run_tags {
+
+  tags = {
     Name = var.tag
   }
+
   ssh_username = "kali"
 }
 
@@ -70,4 +84,3 @@ build {
     destination = "/home/kali/.ssh/authorized_keys"
   }
 }
-
