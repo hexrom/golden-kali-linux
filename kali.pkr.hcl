@@ -11,10 +11,6 @@ variable "region" {
   default = "us-east-1"
 }
 
-variable "tag" {
-  default = "kali"
-}
-
 variable "root_volume_size_Gi" {
   default = "75"
 }
@@ -22,10 +18,16 @@ variable "root_volume_size_Gi" {
 source "amazon-ebs" "kali-linux" {
   ami_description = "Encrypted - Kali AMI"
   ami_name        = "Encrypted-Kali-${formatdate("YYYYMMDDhhmmss", timestamp())}"
-  instance_type   = "t2.medium"
+  instance_type   = "t2.large"
   region          = var.region
   encrypt_boot    = true
-  ssh_timeout     = "10m"
+  ssh_username    = "kali"
+  ssh_timeout     = "5m"
+
+  tags = {
+    Name    = "kali-golden"
+    service = "pentest"
+  }
 
   source_ami_filter {
     filters = {
@@ -46,12 +48,6 @@ source "amazon-ebs" "kali-linux" {
     encrypted             = true
     delete_on_termination = true
   }
-
-  tags = {
-    Name = var.tag
-  }
-
-  ssh_username = "kali"
 }
 
 build {
