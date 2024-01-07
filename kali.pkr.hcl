@@ -33,7 +33,7 @@ source "amazon-ebs" "kali-linux" {
     filters = {
       "architecture"                      = "x86_64"
       "block-device-mapping.volume-type"  = "gp2"
-      "name"                              = "kali-last*"
+      "name"                              = "kali-last-snapshot-amd64*"
       "root-device-type"                  = "ebs"
       "virtualization-type"               = "hvm"
     }
