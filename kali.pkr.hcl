@@ -1,28 +1,26 @@
 {
   "variables": {
-    "ami"   : "{{env `AMI`}}",
-    "region": "{{env `REGION`}}",
-    "script": "{{env `SCRIPT`}}",
-    "tag":    "{{env `NAME`}}",
+    "region": "us-east-1",
+    "tag":    "kali",
     "root_volume_size_Gi": "120"
   },
   "builders": [{
     "ami_description": "Encrypted - Kali AMI",
-    "ami_name": "Encrypted-{{user `ami`}}-{{isotime | clean_resource_name}}",
-    "instance_type": "t3.2xlarge",
+    "ami_name": "Encrypted-Kali-{{isotime | clean_resource_name}}",
+    "instance_type": "t2.medium",
     "region": "{{user `region`}}",
     "encrypt_boot": "true",
     "source_ami_filter": {
       "filters": {
         "architecture": "x86_64",
         "block-device-mapping.volume-type": "gp2",
-        "name": "kali-linux-2022.3b-804fcc46-63fc-4eb6-85a1-50e66d6c7215",
+        "name": "kali-last*",
         "root-device-type": "ebs",
         "virtualization-type": "hvm"
       },
       "most_recent": true,
       "owners": [
-        "211372476111"
+        "679593333241"
       ]
     },
     "launch_block_device_mappings": [
@@ -60,35 +58,10 @@
     ],
     "type": "shell"
   },
-    {
-      "scripts": [
-        "{{template_dir}}/{{user `script`}}"
-      ],
-      "type": "shell"
-    },
+
     {
       "type": "file",
-      "source": "{{template_dir}}/desktop/install-tools.sh",
-      "destination": "/home/kali/install-tools.sh"
-    },
-    {
-      "type": "file",
-      "source": "{{template_dir}}/desktop/motd.sh",
-      "destination": "/home/kali/motd.sh"
-    },
-    {
-      "type": "file",
-      "source": "{{template_dir}}/desktop/domains/orig.domains.txt",
-      "destination": "/home/kali/domains/orig.domains.txt"
-    },
-    {
-      "type": "file",
-      "source": "{{template_dir}}/desktop/domains/asset_note.domains.txt",
-      "destination": "/home/kali/domains/asset_note.txt"
-    },
-    {
-      "type": "file",
-      "source": "/path/to/your/ssh/public/key.pub",
+      "source": "{{template_dir}}/ssh/kali-key.pub",
       "destination": "/home/kali/.ssh/authorized_keys"
     }
   ]
