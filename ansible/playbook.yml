@@ -31,12 +31,6 @@
       ansible.builtin.apt:
         upgrade: safe
 
-    - name: Install necessary packages
-      apt:
-        name: 
-          - git
-        state: present
-    
     # Packages required for tasks
     - name: Ensure packages installed for config tasks
       ansible.builtin.apt:
@@ -45,26 +39,14 @@
           - metasploit-framework
           - postgresql
           - ufw
+          - git
         state: present
       register: apt_config_packages
       until: apt_config_packages is success
       retries: 1
       delay: 10
 
-    # UFW
-    - name: Block inbound traffic by default
-      community.general.ufw:
-        state: enabled
-        direction: incoming
-        default: reject
-
-    - name: Enable UFW
-      ansible.builtin.systemd:
-        name: ufw.service
-        state: started
-        enabled: true
-
-    # Python 
+    # Python
     - name: Ensure packages for Python pip are installed
       ansible.builtin.apt:
         name:
@@ -77,12 +59,12 @@
       retries: 2
       delay: 10
 
-   # Disable automatic updates
+    # Disable automatic updates
     - name: Disable apt systemd timers
       ansible.builtin.systemd:
         name: "{{ item }}"
         state: stopped
-        enabled: false
+        enabled: false  # Ensure no truthy values
       loop:
         - apt-daily.timer
         - apt-daily-upgrade.timer
@@ -90,7 +72,7 @@
     - name: Prevent apt services from running
       ansible.builtin.systemd:
         name: "{{ item }}"
-        masked: true
+        masked: true  # Ensure no truthy values
       loop:
         - apt-daily.service
         - apt-daily-upgrade.service
@@ -117,5 +99,3 @@
     - name: Clean up apt cache
       ansible.builtin.apt:
         clean: yes
-
-
