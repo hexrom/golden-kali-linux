@@ -1,0 +1,15 @@
+repos:
+  - repo: https://github.com/ansible/ansible-lint
+    rev: v6.22.1
+    hooks:
+      - id: ansible-lint
+        args: ['--skip-list', 'yaml[trailing-spaces],yaml[truthy]']
+        name: Ansible-lint
+        description: This hook runs ansible-lint.
+        entry: python3 -m ansiblelint -v --force-color
+        language: python
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
