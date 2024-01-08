@@ -1,0 +1,14 @@
+- name: Configure Kali Linux
+  hosts: default
+  become: true
+  tasks:
+    - name: Update and upgrade apt packages
+      apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: Install necessary packages
+      apt:
+        name: 
+          - git
+        state: present

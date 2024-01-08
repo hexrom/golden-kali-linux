@@ -79,4 +79,9 @@ build {
     source      = "${path.root}/ssh/kali-key.pub"
     destination = "/home/kali/.ssh/authorized_keys"
   }
+
+  # Ansible provisioner
+  provisioner "ansible" {
+    playbook_file = "${path.root}/ansible/playbook.yml"
+  }
 }
