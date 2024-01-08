@@ -1,14 +1,121 @@
 - name: Configure Kali Linux
-  hosts: default
+  hosts: all
   become: true
   tasks:
-    - name: Update and upgrade apt packages
-      apt:
-        update_cache: yes
-        upgrade: dist
+    # Update Kali and deploy packages
+    - name: Configure apt sources.list to use Cloudflare mirror
+      ansible.builtin.replace:
+        path: /etc/apt/sources.list
+        regexp: '^(deb\s+)http://([A-Za-z0-9.-]+)(/kali.*)$'
+        replace: '\1http://kali.download\3'
+
+    - name: Update apt
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: Ensure apt packages are installed
+      ansible.builtin.apt:
+        name:
+          - apt-transport-https
+          - apt-utils
+          - ca-certificates
+        state: present
+
+    - name: Configure apt sources.list to use HTTPS
+      ansible.builtin.replace:
+        path: /etc/apt/sources.list
+        regexp: '^(deb\s+)http://(.*)$'
+        replace: '\1https://\2'
+
+    - name: Upgrade all packages
+      ansible.builtin.apt:
+        upgrade: safe
 
     - name: Install necessary packages
       apt:
         name: 
           - git
         state: present
+    
+    # Packages required for tasks
+    - name: Ensure packages installed for config tasks
+      ansible.builtin.apt:
+        name:
+          - firefox-esr
+          - metasploit-framework
+          - postgresql
+          - ufw
+        state: present
+      register: apt_config_packages
+      until: apt_config_packages is success
+      retries: 1
+      delay: 10
+
+    # UFW
+    - name: Block inbound traffic by default
+      community.general.ufw:
+        state: enabled
+        direction: incoming
+        default: reject
+
+    - name: Enable UFW
+      ansible.builtin.systemd:
+        name: ufw.service
+        state: started
+        enabled: true
+
+    # Python 
+    - name: Ensure packages for Python pip are installed
+      ansible.builtin.apt:
+        name:
+          - python3-dev
+          - python3-pip
+          - python3-setuptools
+        state: present
+      register: apt_pip_packages
+      until: apt_pip_packages is success
+      retries: 2
+      delay: 10
+
+   # Disable automatic updates
+    - name: Disable apt systemd timers
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: stopped
+        enabled: false
+      loop:
+        - apt-daily.timer
+        - apt-daily-upgrade.timer
+
+    - name: Prevent apt services from running
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        masked: true
+      loop:
+        - apt-daily.service
+        - apt-daily-upgrade.service
+
+    # Metasploit
+    - name: Enable Postgresql service
+      ansible.builtin.systemd:
+        name: postgresql.service
+        state: started
+        enabled: true
+
+    - name: Initialize msfdb
+      ansible.builtin.command:
+        cmd: msfdb init
+      register: msfdb_init_cmd
+      changed_when: '"Creating initial database schema" in msfdb_init_cmd.stdout'
+
+    # Cleanup Tasks
+    - name: Remove unnecessary packages and dependencies
+      ansible.builtin.apt:
+        autoremove: yes
+        purge: yes
+
+    - name: Clean up apt cache
+      ansible.builtin.apt:
+        clean: yes
+
+
