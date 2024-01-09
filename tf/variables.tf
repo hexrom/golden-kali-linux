@@ -7,7 +7,7 @@ variable "region" {
 variable "ami_id" {
   description = "The AMI ID of the Packer-created Kali Linux instance"
   type        = string
-  default     = "ami-06d6f09e9ccc7fce1"
+  default     = "ami-06d6f09e9ccc7fce1" # Change this to your own value
 }
 
 variable "instance_type" {
@@ -19,5 +19,5 @@ variable "instance_type" {
 variable "key_name" {
   description = "The name of the key pair to attach to the EC2 instance"
   type        = string
-  default     = "prodlabs"
+  default     = "prodlabs" # Change this to your own value
 }
