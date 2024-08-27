@@ -1,4 +1,4 @@
-# kali-golden
+# golden-kali-linux
 Terraform Packer template for creating a golden Kali Linux Amazon Machine Image (AMI) in AWS
 
 ## Creating an AWS EC2 Instance with Packer and Terraform
